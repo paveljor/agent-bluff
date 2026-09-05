@@ -12,7 +12,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+viz = [
+    "matplotlib>=3.8",
+]
 dev = [
+    "matplotlib>=3.8",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "ruff>=0.5",
@@ -48,9 +52,17 @@ ignore = ["D203", "D213", "ANN401", "N818"]
 convention = "google"
 
 [tool.mypy]
-python_version = "3.11"
+# 3.12 not because the code needs it -- requires-python is >=3.11 -- but
+# because numpy ships stubs using 3.12-only syntax that fail to parse under
+# an older setting, which aborts the whole check.
+python_version = "3.12"
 strict = true
 files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["numpy.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = "tests.*"

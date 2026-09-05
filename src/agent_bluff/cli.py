@@ -278,6 +278,28 @@ def cmd_transcripts(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_chart(args: argparse.Namespace) -> int:
+    """Render the figures for a run.
+
+    Args:
+        args: Parsed arguments.
+
+    Returns:
+        Process exit code.
+    """
+    try:
+        from agent_bluff.charts import write_lie_rate
+    except ImportError:
+        sys.exit("matplotlib is not installed. Install the extra: pip install -e '.[viz]'")
+
+    matches = list(MatchLog(Path(args.run_dir)).read())
+    if not matches:
+        sys.exit(f"no matches in {args.run_dir}")
+    for path in write_lie_rate(matches, Path(args.out)):
+        print(f"  wrote {path}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Construct the argument parser.
 
@@ -320,6 +342,11 @@ def build_parser() -> argparse.ArgumentParser:
     analyze = sub.add_parser("analyze", help="print leaderboards and metrics")
     analyze.add_argument("--run-dir", default="runs/main")
     analyze.set_defaults(func=cmd_analyze)
+
+    chart = sub.add_parser("chart", help="render figures from a run")
+    chart.add_argument("--run-dir", default="runs/main")
+    chart.add_argument("--out", default="figures")
+    chart.set_defaults(func=cmd_chart)
 
     transcripts = sub.add_parser("transcripts", help="dump readable dialogue")
     transcripts.add_argument("--run-dir", default="runs/main")
